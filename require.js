@@ -135,3 +135,14 @@ function addEvent (obj, type, fn) {
 
 
 // forEach, map, every
+function forEach (ary, callback, context) {
+	if (ary == null) return;
+
+	if (nativeforEach && ary.forEach === nativeforEach) {
+		ary.forEach(callback, context);
+	} else if (ary.length === +ary.length) {
+		for (var i = 0, l = ary.length; i < l; i++) {
+			callback.call(context, ary[i], i, ary);
+		}
+	}
+}
