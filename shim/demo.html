@@ -16,12 +16,17 @@
 	window.onload = function (){
 		config({
 			shim : {
-				'moduleA.js' : {}
+				'moduleA.js' : {},
+				'moduleC.js' : {}
 			}
 		});
-		define(['moduleB.js', 'moduleA.js'], function (b){
-			b.ALERT('sdf');
-			alert('inside');
+		define(['moduleB.js', 'moduleA.js', 'moduleC.js'], function (b){
+			b.ALERT('bbb');
+			setTimeout(function(){
+				ALERT('ccc');
+				LLL('ddd');
+				b.ALERT('bbb2');
+			},0)
 		});
 	}
 

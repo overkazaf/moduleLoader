@@ -1,6 +1,6 @@
 !function(root){
-	function ALERT(msg){
+	function LLL(msg){
 		alert('Message from shim:' + msg);
 	};
-	root.ALERT = ALERT;
+	root.LLL = LLL;
 }(window);

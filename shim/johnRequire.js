@@ -49,10 +49,9 @@ function getModule (id) {
 		currentModule = module;
 		if (id in defineConfig['shim']) {
 			// 非AMD规范的模块， 用shim机制加载
-
+			module.loaded = true;
 			shim[id] = new Function('', codes);
-			module.loaded = true; 
-			module.onLoad.push(shim[id]); 
+			shim[id].call(shim);
 		} else {
 			// 规范的AMD模块， 直接注入全局变量
 			new Function('', codes)();
@@ -89,7 +88,15 @@ function config (json) {
  */
 function define (deptNames, factory) {
 	// 获取各个模块
-	var deps = deptNames.map(getModule);
+	var deps = [];
+	for (var i=0,l=deptNames.length; i<l; i++) {
+		var d = deptNames[i];
+		if (d in defineConfig['shim']) {
+			getModule(d);
+		} else {
+			deps.push(getModule(d));
+		}
+	}
 	var thisMod = currentModule;
 
 	deps.forEach(function (m){
@@ -97,7 +104,6 @@ function define (deptNames, factory) {
 			m.onLoad.push(moduleLoadedEvent);
 		}
 	});
-
 	function moduleLoadedEvent () {
 		if (!deps.every(function(m){
 			return m.loaded;
@@ -111,6 +117,7 @@ function define (deptNames, factory) {
 
 
 		var exports = factory.apply(null, args);
+
 		if (thisMod) {
 			thisMod.exports = exports;
 			thisMod.loaded = true;
