@@ -5,7 +5,7 @@
 	<title>Document</title>
 </head>
 <body>
-	
+	<div class="container"></div>
 </body>
 <script type="text/javascript" src="johnRequire.js"></script>
 <script type="text/javascript">
@@ -16,17 +16,13 @@
 	window.onload = function (){
 		config({
 			shim : {
-				'moduleA.js' : {},
-				'moduleC.js' : {}
+				'jquery-1.11.1.min.js' : {
+					exports : '$'
+				}
 			}
 		});
-		define(['moduleB.js', 'moduleA.js', 'moduleC.js'], function (b){
-			b.ALERT('bbb');
-			setTimeout(function(){
-				ALERT('ccc');
-				LLL('ddd');
-				b.ALERT('bbb2');
-			},0)
+		define(['jquery-1.11.1.min.js','moduleB.js'], function (moduleB){
+			log($('.container').length);moduleB.CALL('module loaded');
 		});
 	}
 

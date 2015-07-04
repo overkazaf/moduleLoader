@@ -53,7 +53,7 @@ function getModule (id) {
 			shim[id] = new Function('', codes);
 			shim[id].call(shim);
 		} else {
-			// 规范的AMD模块， 直接注入全局变量
+			// 规范的AMD模块， 直接注入并交给引用
 			new Function('', codes)();
 		}
 	});

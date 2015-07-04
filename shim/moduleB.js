@@ -1,7 +1,7 @@
 define([], function(){
 	return {
-		ALERT : function (msg){
-			alert('Message from module B:' + msg);
+		CALL : function (msg){
+			log('Message from module B:' + msg);
 		}
 	}
 });
