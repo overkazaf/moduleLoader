@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	
+</body>
+<script type="text/javascript" src="johnRequire.js"></script>
+<script type="text/javascript">
+	var log = function (k, v) {
+		window.console && window.console.log && window.console.log(k, v);
+	};
+
+	window.onload = function (){
+		config({
+			shim : {
+				'moduleA.js' : {}
+			}
+		});
+		define(['moduleB.js', 'moduleA.js'], function (b){
+			b.ALERT('sdf');
+			alert('inside');
+		});
+	}
+
+</script>
+</html>
