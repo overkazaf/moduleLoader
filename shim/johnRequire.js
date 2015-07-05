@@ -51,6 +51,7 @@ function getModule (id) {
 			// 非AMD规范的模块， 用shim机制加载
 			module.loaded = true;
 			shim[id] = new Function('', codes);
+			log(id, codes);
 			shim[id].call(shim);
 		} else {
 			// 规范的AMD模块， 直接注入并交给引用
