@@ -51,7 +51,7 @@ function getModule (id) {
 			// 非AMD规范的模块， 用shim机制加载
 			module.loaded = true;
 			shim[id] = new Function('', codes);
-			log(id, codes);
+			//log(id, codes);
 			shim[id].call(shim);
 		} else {
 			// 规范的AMD模块， 直接注入并交给引用
@@ -77,7 +77,7 @@ function readFileAsync (url, callback) {
 	xhr.send(null);
 }
 
-function config (json) {
+define.config = function (json) {
 	defineConfig = json || {'shim' : {}};
 }
 
@@ -100,7 +100,7 @@ function define (deptNames, factory) {
 	}
 	var thisMod = currentModule;
 
-	deps.forEach(function (m){
+	forEach(deps, function (m){
 		if (!m.loaded) {
 			m.onLoad.push(moduleLoadedEvent);
 		}
@@ -122,11 +122,21 @@ function define (deptNames, factory) {
 		if (thisMod) {
 			thisMod.exports = exports;
 			thisMod.loaded = true;
-			thisMod.onLoad.forEach(function (f) {
+			forEach(thisMod.onLoad, function (f) {
 				f();
 			});
 		}
 	}
 
 	moduleLoadedEvent();
+}
+
+function forEach (ary, callback, context) {
+	if (nativeForEach && ary.forEach === nativeForEach) {
+		nativeForEach.call(ary, callback);
+	} else if (ary.length){
+		for (var i = 0, l = ary.length; i < l; i++) {
+			callback.call(context, ary[i], i, ary);
+		}
+	}
 }
