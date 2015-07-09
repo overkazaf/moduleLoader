@@ -122,9 +122,12 @@ $('#tab-container').easytabs();
 			}
 		});
 
-		define(['jquery', 'hashchange', 'easytabs', 'moduleB'], function (moduleB){
-			moduleB.init();
-		});
+    
+
+    // 规范的cmd规范
+    define(['jquery', 'moduleC'], function (moduleC){
+       moduleC.init();
+    });
 	}
 
 </script>

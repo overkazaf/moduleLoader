@@ -40,7 +40,7 @@
 		return protostr.call(it) === ['object Array'];
 	}
 
-	function getAbsUrl (url) {
+	function getAbsoluteUrl (url) {
 		return baseUrl + (moduleAlias[url] || url) + urlSubfix;
 	}
 	function getModule (id) {
@@ -84,11 +84,15 @@
 	 */
 	function readFileAsync (url, callback) {
 		var xhr = new XMLHttpRequest();
-		url = getAbsUrl(url);
+		url = getAbsoluteUrl(url);
 		xhr.open('get', url, true);
-		xhr.addEventListener ('load', function(){
-			if (xhr.status == 200) {
-				callback(xhr.responseText);
+
+		// ie8 下要用这样的方式监听xhr对象的状态，否则报错
+		addEvent(xhr, 'readystatechange', function(){
+			if (xhr.readyState == 4) {
+				if (xhr.status == 200) {
+					callback(xhr.responseText);
+				}
 			}
 		});
 		xhr.send(null);
@@ -102,7 +106,12 @@
 		//defineConfig = json || {'shim' : {}};
 	}
 
-
+	/**
+	 * [eachProp 属性遍历]
+	 * @param  {[Object]}   obj      [description]
+	 * @param  {Function} callback [回调]
+	 * @return {[void]}            [description]
+	 */
 	function eachProp (obj, callback) {
 		var prop;
 		for (prop in obj) {
@@ -172,7 +181,7 @@
 
 		var thisMod = currentModule;
 
-		forEach(deps, function (m){
+		deps.forEach(function (m){
 			if (!m.loaded) {
 				m.onLoad.push(moduleLoadedEvent);
 			}
@@ -193,7 +202,7 @@
 			if (thisMod) {
 				thisMod.exports = exports;
 				thisMod.loaded = true;
-				forEach(thisMod.onLoad, function (f) {
+				thisMod.onLoad.forEach(function (f) {
 					// ensure every module execute correctly
 					setTimeout(f, 4);
 				});
@@ -239,14 +248,81 @@
 		}
 	}
 
-	Function.prototype.bind = function (){
-		var fn = this,
-			args = nativeSlice.call(arguments),
-			obj = args.shift();
-		return function (){
-			return fn.apply(obj, args.concat(nativeSlice.call(arguments)));
+	/**
+	 * [makeFnSupports 添加一些ES5的方法，方便操作]
+	 * @return {[type]} [description]
+	 */
+	function makeFnSupports () {
+		if (typeof Array.prototype.map !== 'Function') {
+			Array.prototype.map = function (callback){
+				var result = [],
+					ary = this;
+				if (ary.length) {
+					for (var i = 0, l = ary.length; i < l; i++) {
+						result.push(callback.call(this, ary[i], i, ary));
+					}
+				}
+				return result;
+			}
+		}
+
+		if (typeof Array.prototype.every !== 'Function') {
+			Array.prototype.every = function (callback){
+				var result = [],
+					ary = this;
+				if (ary.length) {
+					for (var i = 0, l = ary.length; i < l; i++) {
+						if (!callback.call(this, ary[i], i, ary)) {
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+		}
+
+		if (typeof Array.prototype.forEach !== 'Function') {
+			Array.prototype.forEach = function (callback){
+				var result = [],
+					ary = this;
+				if (ary.length) {
+					for (var i = 0, l = ary.length; i < l; i++) {
+						callback.call(this, ary[i], i, ary);
+					}
+				}
+			}
+		}
+
+		if (typeof Function.prototype.bind !== 'Function') {
+			Function.prototype.bind = function (){
+				var fn = this,
+					args = nativeSlice.call(arguments),
+					obj = args.shift();
+				return function (){
+					return fn.apply(obj, args.concat(nativeSlice.call(arguments)));
+				}
+			};
 		}
 	};
+
+	/**
+	 * [addEvent 事件控制]
+	 * @param {[type]}   obj  [description]
+	 * @param {[type]}   type [description]
+	 * @param {Function} fn   [description]
+	 */
+	function addEvent (obj, type, fn) {
+		if (window.addEventListener) {
+			obj.addEventListener(type, fn);
+		} else if (obj.attachEvent) {
+			obj.attachEvent('on' + type, fn, false);
+		} else {
+			obj['on' + type] = fn;
+		}
+	}
+
+	// 开始为不支持ES5的浏览器注入一些工具方法
+	makeFnSupports();
 
 	global.define = define;
 	global.shim = shim;

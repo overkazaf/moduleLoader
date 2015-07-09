@@ -1,6 +1,7 @@
-!function(root){
-	function LLL(msg){
-		alert('Message from shim:' + msg);
+define(['jquery', 'hashchange', 'easytabs', 'moduleB'], function (moduleB){
+	return {
+		init : function (){
+			moduleB.init();
+		}
 	};
-	root.LLL = LLL;
-}(window);
+});
