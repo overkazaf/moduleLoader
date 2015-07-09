@@ -19,12 +19,15 @@
 		currentModule = null,
 		objproto = Object.prototype,
 		protostr = objproto.toString,
+		hasOwn = objproto.hasOwnProperty,
 		arrproto = Array.prototype,
 		nativeForEach = arrproto.forEach,
+		nativeMap = arrproto.map,
+		nativeEvery = arrproto.every,
 		nativeSlice = arrproto.slice;
 
 
-	defineConfig['shim'] = {};
+	//defineConfig['shim'] = {};
 
 	function isFunction (it) {
 		return protostr.call(it) === ['object Function'];
@@ -86,8 +89,57 @@
 	}
 
 	define.config = function (json) {
-		defineConfig = json || {'shim' : {}};
+		defineConfig = mixin(defineConfig, json, true, true);
+		//defineConfig = json || {'shim' : {}};
 	}
+
+
+	function eachProp (obj, callback) {
+		var prop;
+		for (prop in obj) {
+			if (hasProp(obj, prop)) {
+				if (callback(obj[prop], prop)) break;
+			}
+		}
+	}
+
+	function hasProp (obj, prop) {
+		return hasOwn.call(obj, prop);
+	}
+
+	/**
+	 * [mixin 杂揉函数]
+	 * @param  {[Object]} target          [目标对象]
+	 * @param  {[Object]} source          [源对象]
+	 * @param  {[Boolean]} force           [是否覆盖目标对象属性]
+	 * @param  {[Boolean]} deepStringMixin [是否深拷贝]
+	 * @return {[Object]}                 [糅合后的对象]
+	 */
+	function mixin(target, source, force, deepStringMixin) {
+        if (source) {
+            eachProp(source, function (value, prop) {
+                if (force || !hasProp(target, prop)) {
+                    if (deepStringMixin 
+                    	&& typeof value === 'object' 
+                    	&& value 
+                    	&& !isArray(value) 
+                    	&& !isFunction(value) 
+                    	&& !(value instanceof RegExp)) {
+	                        if (!target[prop]) {
+	                            target[prop] = {};
+	                        }
+
+	                        // recursive calling
+                        	mixin(target[prop], value, force, deepStringMixin);
+                    } else {
+                        target[prop] = value;
+                    }
+                }
+
+            });
+        }
+        return target;
+    }
 
 	/**
 	 * [define 以amd规范定义一个js模块]
@@ -152,6 +204,29 @@
 					break;
 				}
 			}
+		}
+	}
+
+	function map (ary, callback, context) {
+		if (nativeMap && ary.map === nativeMap) {
+			nativeMap.call(ary, callback);
+		} else if (ary.length){
+			var result = [];
+			for (var i = 0, l = ary.length; i < l; i++) {
+				result.push(callback.call(context, ary[i], i, ary));
+			}
+			return result;
+		}
+	}
+
+	function every (ary, callback, context) {
+		if (nativeEvery && ary.every === nativeEvery) {
+			nativeEvery.call(ary, callback);
+		} else if (ary.length){
+			for (var i = 0, l = ary.length; i < l; i++) {
+				if (!callback.call(context, ary[i], i, ary)) return false;
+			}
+			return true;
 		}
 	}
 
