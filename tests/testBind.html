@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	
+</body>
+<script type="text/javascript">
+	function bind (obj, fn) {
+		return function (){
+			return fn.apply(obj, arguments);
+		}
+	}
+
+	Function.prototype.bind = function (){
+		var fn = this,
+			args = Array.prototype.slice.call(arguments),
+			obj = args.shift();
+
+		return function (){
+			return fn.apply(obj, args.concat(Array.prototype.slice.call(arguments)));
+		}
+	}
+
+	window.onload = function (){
+		function LOG (key){
+			console.log(key);
+		}
+
+		var name = 'window name';
+		var obj = {
+			name : 'object name',
+			'fx' : function (){
+				LOG(this.name);
+			}
+		};
+
+		var fx = obj['fx'];
+		var fx2 = fx.bind(obj);
+		fx();
+		fx2();
+	}
+</script>
+</html>

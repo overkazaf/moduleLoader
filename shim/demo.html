@@ -105,7 +105,7 @@ $('#tab-container').easytabs();
 		define.config({
 			shim : {
 				'jquery-1.7.1.min.js' : {
-					exports : '$'
+					exports : '_'
 				},
 				'jquery.hashchange.min.js' : {
 					exports : 'hs'
@@ -117,10 +117,8 @@ $('#tab-container').easytabs();
 		});
 
 		define(['jquery-1.7.1.min.js', 'jquery.hashchange.min.js', 'jquery.easytabs.js', 'moduleB.js'], function (moduleB){
-			setTimeout(function(){
-				moduleB.init();
-       
-			}, 0)
+			//moduleB.init();
+      $('#tab-container').easytabs();
 		});
 	}
 

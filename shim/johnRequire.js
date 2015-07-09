@@ -14,11 +14,14 @@
 	var moduleCache = {},
 		shim = {},
 		defineConfig = {},
+		deptCounts = 0,
+		loadQueue = [], // 全局
 		currentModule = null,
 		objproto = Object.prototype,
 		protostr = objproto.toString,
 		arrproto = Array.prototype,
-		nativeForEach = arrproto.forEach;
+		nativeForEach = arrproto.forEach,
+		nativeSlice = arrproto.slice;
 
 
 	defineConfig['shim'] = {};
@@ -50,10 +53,13 @@
 			currentModule = module;
 			if (id in defineConfig['shim']) {
 				// 非AMD规范的模块， 用shim机制加载
-				module.loaded = true;
-				shim[id] = new Function('', codes);
+				if(!shim[id])shim[id] = {};
+
+				shim[id]['exports'] = new Function('', codes);
 				//log(id, codes);
-				shim[id].call(global);
+				
+				var fnRebind = shim[id]['exports'].bind(shim[id]['exports']);
+				fnRebind();
 			} else {
 				// 规范的AMD模块， 直接注入并交给引用
 				new Function('', codes)();
@@ -92,6 +98,7 @@
 	function define (deptNames, factory) {
 		// 获取各个模块
 		var deps = [];
+		deptCounts = deptNames.length;
 		for (var i=0,l=deptNames.length; i<l; i++) {
 			var d = deptNames[i];
 			if (d in defineConfig['shim']) {
@@ -101,6 +108,7 @@
 				deps.push(getModule(d));
 			}
 		}
+
 		var thisMod = currentModule;
 
 		forEach(deps, function (m){
@@ -108,30 +116,31 @@
 				m.onLoad.push(moduleLoadedEvent);
 			}
 		});
+		
 		function moduleLoadedEvent () {
 			if (!deps.every(function(m){
 				return m.loaded;
 			})) {
 				return;
 			}
-
 			var args = deps.map(function (mod){
 				return mod.exports;
 			});
-
-
+			
 			var exports = factory.apply(null, args);
 
 			if (thisMod) {
 				thisMod.exports = exports;
 				thisMod.loaded = true;
 				forEach(thisMod.onLoad, function (f) {
-					f();
+					// ensure every module execute correctly
+					setTimeout(f, 4);
 				});
 			}
 		}
 
 		moduleLoadedEvent();
+		
 	}
 
 	function forEach (ary, callback, context) {
@@ -146,5 +155,15 @@
 		}
 	}
 
+	Function.prototype.bind = function (){
+		var fn = this,
+			args = nativeSlice.call(arguments),
+			obj = args.shift();
+		return function (){
+			return fn.apply(obj, args.concat(nativeSlice.call(arguments)));
+		}
+	};
+
 	global.define = define;
+	global.shim = shim;
 })(window);
