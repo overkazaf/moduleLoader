@@ -14,8 +14,11 @@
 	var moduleCache = {},
 		shim = {},
 		defineConfig = {},
+		moduleAlias = {},
 		deptCounts = 0,
-		loadQueue = [], // 全局
+		loadQueue = [], // 全局模块队列
+		baseUrl = '',
+		urlSubfix = '.js',
 		currentModule = null,
 		objproto = Object.prototype,
 		protostr = objproto.toString,
@@ -37,6 +40,9 @@
 		return protostr.call(it) === ['object Array'];
 	}
 
+	function getAbsUrl (url) {
+		return baseUrl + (moduleAlias[url] || url) + urlSubfix;
+	}
 	function getModule (id) {
 		if (id in moduleCache) {
 			return moduleCache[id];
@@ -54,7 +60,7 @@
 
 		readFileAsync (id, function (codes){
 			currentModule = module;
-			if (id in defineConfig['shim']) {
+			if (id in moduleAlias) {
 				// 非AMD规范的模块， 用shim机制加载
 				if(!shim[id])shim[id] = {};
 
@@ -78,7 +84,7 @@
 	 */
 	function readFileAsync (url, callback) {
 		var xhr = new XMLHttpRequest();
-		url = url && url.indexOf('.js') >= 0 ? url : url + '.js';
+		url = getAbsUrl(url);
 		xhr.open('get', url, true);
 		xhr.addEventListener ('load', function(){
 			if (xhr.status == 200) {
@@ -90,6 +96,9 @@
 
 	define.config = function (json) {
 		defineConfig = mixin(defineConfig, json, true, true);
+		moduleAlias = mixin({}, defineConfig['alias'], true);
+		baseUrl = defineConfig['baseUrl'];
+
 		//defineConfig = json || {'shim' : {}};
 	}
 

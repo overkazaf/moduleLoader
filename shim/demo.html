@@ -103,22 +103,27 @@ $('#tab-container').easytabs();
 
 	window.onload = function (){
 		define.config({
+      baseUrl : './', // for js loading
+      alias : {
+        jquery : 'jquery-1.7.1.min',
+        hashchange : 'jquery.hashchange.min',
+        easytabs : 'jquery.easytabs'
+      },
 			shim : {
-				'jquery-1.7.1.min.js' : {
+				jquery : {
 					exports : '_'
 				},
-				'jquery.hashchange.min.js' : {
+				hashchange : {
 					exports : 'hs'
 				},
-				'jquery.easytabs.js' : {
+				easytabs : {
 					exports : 'tab'
 				}
 			}
 		});
 
-		define(['jquery-1.7.1.min.js', 'jquery.hashchange.min.js', 'jquery.easytabs.js', 'moduleB.js'], function (moduleB){
+		define(['jquery', 'hashchange', 'easytabs', 'moduleB'], function (moduleB){
 			moduleB.init();
-
 		});
 	}
 
