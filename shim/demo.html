@@ -111,18 +111,19 @@ $('#tab-container').easytabs();
       },
 			shim : {
 				jquery : {
+          deps : [],
 					exports : '_'
 				},
 				hashchange : {
+          deps : [],
 					exports : 'hs'
 				},
 				easytabs : {
+          deps : [],
 					exports : 'tab'
 				}
 			}
 		});
-
-    
 
     // 规范的cmd规范
     define(['jquery', 'moduleC'], function (moduleC){

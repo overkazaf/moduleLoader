@@ -45,6 +45,7 @@
 	}
 	function getModule (id) {
 		if (id in moduleCache) {
+			// return the cache module directly
 			return moduleCache[id];
 		}
 
@@ -213,6 +214,7 @@
 		
 	}
 
+	// 已废弃， 采用maskES5FnSupports来加强原生对象的方法
 	function forEach (ary, callback, context) {
 		if (nativeForEach && ary.forEach === nativeForEach) {
 			nativeForEach.call(ary, callback);
@@ -252,13 +254,15 @@
 	 * [makeFnSupports 添加一些ES5的方法，方便操作]
 	 * @return {[type]} [description]
 	 */
-	function makeFnSupports () {
+	function makeES5FnSupports () {
 		if (typeof Array.prototype.map !== 'Function') {
 			Array.prototype.map = function (callback){
 				var result = [],
+					l,
 					ary = this;
-				if (ary.length) {
-					for (var i = 0, l = ary.length; i < l; i++) {
+
+				if (l = ary.length) {
+					for (var i = 0; i < l; i++) {
 						result.push(callback.call(this, ary[i], i, ary));
 					}
 				}
@@ -269,9 +273,11 @@
 		if (typeof Array.prototype.every !== 'Function') {
 			Array.prototype.every = function (callback){
 				var result = [],
+					l,
 					ary = this;
-				if (ary.length) {
-					for (var i = 0, l = ary.length; i < l; i++) {
+
+				if (l = ary.length) {
+					for (var i = 0; i < l; i++) {
 						if (!callback.call(this, ary[i], i, ary)) {
 							return false;
 						}
@@ -284,20 +290,24 @@
 		if (typeof Array.prototype.forEach !== 'Function') {
 			Array.prototype.forEach = function (callback){
 				var result = [],
+					l,
 					ary = this;
-				if (ary.length) {
-					for (var i = 0, l = ary.length; i < l; i++) {
+
+				if (l = ary.length) {
+					for (var i = 0; i < l; i++) {
 						callback.call(this, ary[i], i, ary);
 					}
 				}
 			}
 		}
 
+		// 重新为函数的执行环境绑定上下文
 		if (typeof Function.prototype.bind !== 'Function') {
 			Function.prototype.bind = function (){
 				var fn = this,
 					args = nativeSlice.call(arguments),
 					obj = args.shift();
+
 				return function (){
 					return fn.apply(obj, args.concat(nativeSlice.call(arguments)));
 				}
@@ -312,7 +322,7 @@
 	 * @param {Function} fn   [description]
 	 */
 	function addEvent (obj, type, fn) {
-		if (window.addEventListener) {
+		if (obj.addEventListener) {
 			obj.addEventListener(type, fn);
 		} else if (obj.attachEvent) {
 			obj.attachEvent('on' + type, fn, false);
@@ -321,8 +331,18 @@
 		}
 	}
 
+	function removeEvent (obj, type, fn){
+		if (obj.removeEventListener) {
+			fn ? obj.removeEventListener(type, fn) : obj.removeEventListener(type);
+		} else if (obj.detachEvent) {
+			fn ? obj.detachEvent(type, fn) : obj.detachEvent(fn);
+		} else {
+			obj['on' + type] = fn;
+		}
+	}
+
 	// 开始为不支持ES5的浏览器注入一些工具方法
-	makeFnSupports();
+	makeES5FnSupports();
 
 	global.define = define;
 	global.shim = shim;
