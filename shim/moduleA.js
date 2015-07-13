@@ -1,3 +1,4 @@
+// 测试非AMD规范的模块
 !function(window){
 	
 	function jQuery () {};

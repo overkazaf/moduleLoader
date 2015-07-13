@@ -11,7 +11,8 @@
 
 
 (function ( global ){
-	var moduleCache = {},
+	var 
+		moduleCache = {},
 		shim = {},
 		defineConfig = {},
 		moduleAlias = {},
@@ -29,8 +30,6 @@
 		nativeEvery = arrproto.every,
 		nativeSlice = arrproto.slice;
 
-
-	//defineConfig['shim'] = {};
 
 	function isFunction (it) {
 		return protostr.call(it) === ['object Function'];
