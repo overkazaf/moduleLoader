@@ -12,16 +12,16 @@
 
 (function ( global ){
 	var 
-		moduleCache = {},
-		shim = {},
-		defineConfig = {},
-		moduleAlias = {},
-		deptCounts = 0,
+		moduleCache = {}, // 模块缓存
+		shim = {}, // shim对象
+		defineConfig = {}, // 配置参数
+		moduleAlias = {}, // 模块别名
+		deptCounts = 0, // 依赖数
 		loadQueue = [], // 全局模块队列
-		baseUrl = '',
-		urlSubfix = '.js',
-		currentModule = null,
-		objproto = Object.prototype,
+		baseUrl = '', // 地址
+		urlSubfix = '.js', // 模块后缀
+		currentModule = null, // 当前模块
+		objproto = Object.prototype, 
 		protostr = objproto.toString,
 		hasOwn = objproto.hasOwnProperty,
 		arrproto = Array.prototype,
@@ -39,9 +39,20 @@
 		return protostr.call(it) === ['object Array'];
 	}
 
+	/**
+	 * [getAbsoluteUrl 通过传入的url取得模块绝对路径]
+	 * @param  {[String]} url [模块url]
+	 * @return {[String]}     [绝对路径下的URL]
+	 */
 	function getAbsoluteUrl (url) {
 		return baseUrl + (moduleAlias[url] || url) + urlSubfix;
 	}
+
+	/**
+	 * [getModule 根据模块ID获取模块URL]
+	 * @param  {[String]} id [模块ID]
+	 * @return {[Object]}    [模块对象]
+	 */
 	function getModule (id) {
 		if (id in moduleCache) {
 			return moduleCache[id];
@@ -78,8 +89,8 @@
 	}
 
 	/**
-	 * [readFileAsync 异步读取js文件]
-	 * @return {[type]} [description]
+	 * [readFileAsync 用ajax异步读取js文件，处理非跨域的情况]
+	 * @return {[void]} [description]
 	 */
 	function readFileAsync (url, callback) {
 		var xhr = new XMLHttpRequest();
@@ -97,6 +108,11 @@
 		xhr.send(null);
 	}
 
+	/**
+	 * [config 加载用户配置]
+	 * @param  {[Object]} json [用户的配置参数]
+	 * @return {[Object]}      [杂揉后的参数]
+	 */
 	define.config = function (json) {
 		defineConfig = mixin(defineConfig, json, true, true);
 		moduleAlias = mixin({}, defineConfig['alias'], true);
@@ -107,7 +123,7 @@
 
 	/**
 	 * [eachProp 属性遍历]
-	 * @param  {[Object]}   obj      [description]
+	 * @param  {[Object]}   obj      [需要遍历的对象]
 	 * @param  {Function} callback [回调]
 	 * @return {[void]}            [description]
 	 */
