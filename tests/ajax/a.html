@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+
+</head>
+<body>
+	<button id="btn1">post</button>
+</body>
+<script type="text/javascript" src="./jquery-1.11.1.min.js"></script>
+<script type="text/javascript">
+	$(function (){
+		var $btn1 = $('#btn1');
+		var url = 'http://localhost:3000/test.json';
+		$btn1.on('click', function (){
+			$.get(url, '', function (data){
+				console.log('success');
+			});
+		});
+
+
+		// ajax劫持
+		$(document).ajaxComplete(function (event, jqXHR, options){
+			var url = options.url;
+			var type = url && url.substring(url.lastIndexOf('/')+1, url.lastIndexOf('.'));
+			console.log(type);
+			console.log();
+		});
+
+		
+	});
+</script>
+</html>
